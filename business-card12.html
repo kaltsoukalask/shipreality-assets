@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<title>Markos Papatheodorou | ShipReality</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Geologica',system-ui,sans-serif;
+    background:#07243F;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow-x:hidden;
+    overflow-y:auto;
+    padding:24px 16px;
+  }
+  #loader{
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:#07243F;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:20px;z-index:100;
+    transition:opacity 1s ease,visibility 1s ease;
+  }
+  #loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
+  .scene-wrapper{perspective:400px;width:160px;height:160px;position:relative;flex-shrink:0}
+  .corner{
+    width:100px;height:100px;position:absolute;top:45%;left:50%;
+    transform-style:preserve-3d;
+    transform:translate(-50%,-50%) rotateX(-60deg) rotateY(0deg);
+    animation:rotateToMagic 4s cubic-bezier(0.25,0.1,0.25,1) 5s forwards;
+  }
+  @keyframes rotateToMagic{
+    0%{transform:translate(-50%,-50%) rotateX(-60deg) rotateY(0deg)}
+    50%{transform:translate(-50%,-50%) rotateX(-30deg) rotateY(25deg)}
+    75%{transform:translate(-50%,-50%) rotateX(-40deg) rotateY(45deg)}
+    100%{transform:translate(-50%,-50%) rotateX(-40deg) rotateY(45deg)}
+  }
+  .plane{
+    position:absolute;width:100px;height:100px;
+    backface-visibility:visible;
+    border:1px solid rgba(89,217,212,0.3);overflow:hidden;
+  }
+  .plane img{width:100%;height:100%;object-fit:fill;display:block}
+  .floor{transform:rotateX(90deg) translateZ(-50px);background:rgba(10,42,74,0.6)}
+  .left-wall{transform:rotateY(-90deg) translateZ(-50px);background:rgba(13,58,92,0.6)}
+  .back-wall{transform:translateZ(-50px);background:rgba(15,69,112,0.6)}
+  .corner-glow{
+    position:absolute;top:45%;left:50%;width:140px;height:140px;
+    transform:translate(-50%,-50%);border-radius:50%;
+    background:radial-gradient(circle,rgba(89,217,212,0.15) 0%,transparent 70%);
+    opacity:0;animation:glowIn 1s ease 5.5s forwards;
+  }
+  @keyframes glowIn{to{opacity:1}}
+  .loader-bottom{
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    animation:fadeTextIn 1s ease 0.5s forwards;opacity:0;
+  }
+  @keyframes fadeTextIn{to{opacity:1}}
+  .loader-text{color:#fff;font-size:14px;letter-spacing:0.5px;text-align:center;line-height:1.8;font-weight:400;opacity:0.92}
+  .loader-text span{display:block}
+  .loader-logo{width:220px;height:auto;opacity:1}
+  .card-wrapper{opacity:0;transform:translateY(30px);transition:opacity 0.8s ease 0.3s,transform 0.8s ease 0.3s}
+  .card-wrapper.visible{opacity:1;transform:translateY(0)}
+  .card{background:#fff;border-radius:20px;max-width:420px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,0.10);overflow:hidden}
+  .header{background:#07243F;padding:40px 32px 32px;text-align:center}
+  .logo-area{display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:fadeIn 1s ease-out 0.3s both}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+  .logo-area img{width:100%;max-width:300px;height:auto}
+  .avatar{
+    width:140px;height:140px;border-radius:50%;border:3px solid #59D9D4;
+    object-fit:cover;margin:0 auto 16px;display:block;
+    animation:avatarPop 0.6s ease-out 0.5s both;
+    transition:transform 0.3s ease,box-shadow 0.3s ease;
+  }
+  .avatar:hover{transform:scale(1.08);box-shadow:0 0 20px rgba(89,217,212,0.5)}
+  @keyframes avatarPop{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
+  .name{color:#fff;font-size:22px;font-weight:700;letter-spacing:-0.3px;margin-bottom:6px;animation:fadeIn 0.6s ease-out 0.7s both}
+  .job-title{color:#59D9D4;font-size:14px;font-weight:500;letter-spacing:0.5px;animation:fadeIn 0.6s ease-out 0.9s both}
+  .body{padding:28px 24px 32px;display:flex;flex-direction:column;gap:12px}
+  .btn{
+    display:flex;align-items:center;gap:14px;padding:16px 20px;
+    border-radius:12px;text-decoration:none;font-size:15px;font-weight:600;
+    cursor:pointer;border:none;width:100%;
+    transition:transform 0.2s ease,box-shadow 0.2s ease,background 0.2s ease;
+    animation:btnSlideIn 0.5s ease-out both;
+    background:#F4F6F8;color:#07243F;
+  }
+  .btn:nth-child(1){animation-delay:1.0s}
+  .btn:nth-child(2){animation-delay:1.15s}
+  .btn:nth-child(3){animation-delay:1.3s}
+  .btn:nth-child(4){animation-delay:1.45s}
+  @keyframes btnSlideIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+  .btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,0.12);background:#e8f0f8}
+  .btn:active{transform:translateY(0)}
+  .btn-icon{
+    width:38px;height:38px;border-radius:9px;background:#59D9D4;color:#07243F;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    transition:transform 0.2s ease;
+  }
+  .btn-icon svg{width:26px;height:26px}
+  .btn:hover .btn-icon{transform:scale(1.1)}
+  .btn-label{text-align:left;line-height:1.2}
+  .btn-sub{font-size:12px;font-weight:400;opacity:0.65;margin-top:2px}
+  .footer{text-align:center;padding:0 24px 24px;font-size:12px;color:#aaa;animation:fadeIn 0.6s ease-out 1.6s both}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="scene-wrapper">
+    <div class="corner-glow"></div>
+    <div class="corner">
+      <div class="plane floor"><img src="https://raw.githubusercontent.com/kaltsoukalask/shipreality-assets/main/texture_floor.png" alt=""/></div>
+      <div class="plane left-wall"><img src="https://raw.githubusercontent.com/kaltsoukalask/shipreality-assets/main/texture_left_wall.png" alt=""/></div>
+      <div class="plane back-wall"><img src="https://raw.githubusercontent.com/kaltsoukalask/shipreality-assets/main/texture_right_wall.png" alt=""/></div>
+    </div>
+  </div>
+  <div class="loader-bottom">
+    <div class="loader-text">
+      <span>From Blueprint.</span>
+      <span>To Reality.</span>
+      <span>Instantly.</span>
+    </div>
+    <img class="loader-logo" src="https://raw.githubusercontent.com/kaltsoukalask/shipreality-assets/main/shipreality-logo-dark.jpg" alt="ShipReality"/>
+  </div>
+</div>
+
+<div class="card-wrapper" id="cardWrapper">
+<div class="card">
+  <div class="header">
+    <div class="logo-area">
+      <img src="https://raw.githubusercontent.com/kaltsoukalask/shipreality-assets/main/shipreality-logo-dark.jpg" alt="ShipReality Logo"/>
+    </div>
+    <img class="avatar" src="https://raw.githubusercontent.com/kaltsoukalask/shipreality-assets/main/1645037026288.jpg" alt="Markos Papatheodorou"/>
+    <div class="name">Markos Papatheodorou</div>
+    <div class="job-title">Marine Innovation Officer</div>
+  </div>
+  <div class="body">
+    <a class="btn" href="#" onclick="downloadVCard();return false;">
+      <div class="btn-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg>
+      </div>
+      <div class="btn-label">Save Contact<div class="btn-sub">Add to your phone contacts</div></div>
+    </a>
+    <a class="btn" href="mailto:mpapatheodorou@shipreality.com?subject=Interest%20in%20ShipReality%20Inc.%20Solutions&body=Hi%20Markos%2C%0A%0AI%20came%20across%20ShipReality%20and%20would%20love%20to%20learn%20more%20about%20your%20solutions%20and%20how%20they%20could%20benefit%20our%20operations.%0A%0ALooking%20forward%20to%20connecting.%0A%0ABest%20regards%2C" target="_blank">
+      <div class="btn-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+      </div>
+      <div class="btn-label">Get in Touch<div class="btn-sub">Send us an email</div></div>
+    </a>
+    <a class="btn" href="https://www.shipreality.com/" target="_blank">
+      <div class="btn-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+      <div class="btn-label">Visit Our Website<div class="btn-sub">Explore ShipReality's solutions</div></div>
+    </a>
+    <a class="btn" href="https://www.linkedin.com/in/markospapa" target="_blank">
+      <div class="btn-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
+      </div>
+      <div class="btn-label">Connect on LinkedIn<div class="btn-sub">Let's stay in touch</div></div>
+    </a>
+  </div>
+  <div class="footer">shipreality.com &nbsp;·&nbsp; © 2026 ShipReality</div>
+</div>
+</div>
+
+<script>
+setTimeout(function(){
+  document.getElementById('loader').classList.add('hidden');
+  document.getElementById('cardWrapper').classList.add('visible');
+  document.body.style.background='#f0f4f8';
+  document.body.style.overflow='auto';
+}, 9500);
+
+function downloadVCard() {
+  var photo = "PHOTO;ENCODING=b;TYPE=JPEG:/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCAH1AdsDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9U6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAopKM0ALRSZozxQAtFICfSgsBQAtFNWRWGQQaXNAC0U0tikMgUEnpQA+iuKm+L/hiPxYnhxdRil1Qgs0SMDtA9a7NX3DI/PtSumOzW46ikzRTELRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUANJ5oJqnrOs2egadPf38y29pAu55G7Cvhz9pD9uLVbSS40PwakdnI2Y2u5IJBJ9wMjaeRweaynUjDc2p0pVXaJ9e+P/AIr+H/h1YPPqV4gmAJW3jO52x7DOPxr5G+JX/BQi90byxpGm20O+Xb/pYKlR2J5wR718M+Ivit4w1/V1n1BNTubhXElzNK4l3KDy2wAAYBPJ3A/hXMfFbXR4h02GfSZUuIY0ZWRMAg8tgjjB56e3vXG6k5vTQ9D6vCmve1P0Tu/wDgpNZaHocBv9KjfUpQ23bINr7VyWxu4GcY5715T8RP26/iHrOlS6lZImg6eDlG43OOeinr065/lXw78N9K1P4lapZJdysltaMEZ3BwpOQAcY7qBzx+VfRi/D/Q5Yph4oupnY+XGls2Y/LYDq3boQBSqucWo3LoU6dnKx698M/2qfGNxpy6mfEUiXjfP/Z90VMM2eACcZUnsehr6d+E/wC1xbeI/s1l4ithY3zyeU20HaG45BPUc9a/N7xN4ftdAu7KMuY9MtmE0REiqJGP3mYEknGNoOO3sa7j/hbVja6zDdIoYRW6oZf9WqAcIpY5yO+RnoK53iJUt2bvCKt8Ksfffxs/a00L4eQCy0qWPUNYk+UQodxQ+mB/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NKpD4lY9F0/xPc6jcRMd7TOcrt4AOepxXdakh8zS51vc6haqBG25gSxbORgcck+vWvI/DMtnp81tcXtu80bDCiJwrZ57kHB9q90+Hk1hda9pbJCsUKzRyyedJ87YIOCQOB07VwVVaScdj0KUueDUj9h/2eNeuda+HOnreOZLmCNUdyc5OM8H68fhXp9eS/s6alY6j4Oiezu47sYALRsGHfPI98160OlejF3R8/Ldi0UUVRIUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB//9k=";
+
+  var lines = [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    "N:Papatheodorou;Markos;;;",
+    "FN:Markos Papatheodorou",
+    "TITLE:Marine Innovation Officer",
+    "ORG:ShipReality",
+    "EMAIL:mpapatheodorou@shipreality.com",
+    "TEL:+306980392965",
+    "URL:https://shipreality.com",
+    photo,
+    "END:VCARD"
+  ];
+  var vcardStr = lines.join("\n");
+  var b = new Blob([vcardStr], {type:'text/vcard'});
+  var u = URL.createObjectURL(b);
+  var a = document.createElement('a');
+  a.href = u; a.download = 'Markos_Papatheodorou.vcf'; a.click();
+  URL.revokeObjectURL(u);
+}
+</script>
+</body>
+</html>
