@@ -171,29 +171,25 @@
 </div>
 
 <script>
-setTimeout(function(){
-  document.getElementById('loader').classList.add('hidden');
-  document.getElementById('cardWrapper').classList.add('visible');
-  document.body.style.background='#f0f4f8';
-  document.body.style.overflow='auto';
-}, 9500);
-
 async function downloadVCard() {
-  var photoLine = null;
   try {
-    var imgUrl = "https://raw.githubusercontent.com/kaltsoukalask/shipreality-assets/main/1645037026288.jpg";
-    var response = await fetch(imgUrl);
-    var blob = await response.blob();
-    var base64 = await new Promise(function(res, rej) {
-      var r = new FileReader();
-      r.onload = function() { res(r.result.split(',')[1]); };
+    const imgUrl = "https://raw.githubusercontent.com/kaltsoukalask/shipreality-assets/main/1645037026288.jpg";
+    const response = await fetch(imgUrl);
+    const blob = await response.blob();
+    const base64 = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result.split(',')[1]);
       r.onerror = rej;
       r.readAsDataURL(blob);
     });
-    photoLine = "PHOTO;ENCODING=b;TYPE=JPEG:" + base64;
+    const photo = `PHOTO;ENCODING=b;TYPE=JPEG:${base64}`;
+    buildVCard(photo);
   } catch(e) {
-    alert("Photo fetch failed: " + e.message + " — Contact will be saved without photo.");
+    buildVCard(null);
   }
+}
+
+function buildVCard(photo) {
   var lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
@@ -202,10 +198,10 @@ async function downloadVCard() {
     "TITLE:Marine Innovation Officer",
     "ORG:ShipReality",
     "EMAIL:mpapatheodorou@shipreality.com",
-    "TEL:+306980392965",
+    "TEL:+306948127972",
     "URL:https://shipreality.com"
   ];
-  if (photoLine) lines.push(photoLine);
+  if (photo) lines.push(photo);
   lines.push("END:VCARD");
   var vcardStr = lines.join("\n");
   var b = new Blob([vcardStr], { type: 'text/vcard' });
