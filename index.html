@@ -180,7 +180,7 @@ setTimeout(function(){
 
 async function downloadVCard() {
   try {
-    const imgUrl = "https://raw.githubusercontent.com/kaltsoukalask/shipreality-assets/main/1645037026288.jpg";
+    const imgUrl = "1645037026288.jpg";
     const response = await fetch(imgUrl);
     const blob = await response.blob();
     const base64 = await new Promise((res, rej) => {
