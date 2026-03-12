@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Markos Papatheodorou | ShipReality</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:#07243F;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+
+  /* === LOADER === */
+  #loader{
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:#07243F;
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:20px;
+    z-index:100;
+    transition:opacity 1s ease,visibility 1s ease;
+  }
+  #loader.hidden{opacity:0;visibility:hidden;pointer-events:none}
+
+  /* 3D Corner Scene — smaller for mobile */
+  .scene-wrapper{
+    perspective:400px;
+    width:160px;height:160px;
+    position:relative;
+    flex-shrink:0;
+  }
+  .corner{
+    width:100px;height:100px;
+    position:absolute;top:45%;left:50%;
+    transform-style:preserve-3d;
+    transform:translate(-50%,-50%) rotateX(-60deg) rotateY(0deg);
+    animation:rotateToMagic 4s cubic-bezier(0.25,0.1,0.25,1) 5s forwards;
+  }
+  @keyframes rotateToMagic{
+    0%{transform:translate(-50%,-50%) rotateX(-60deg) rotateY(0deg)}
+    50%{transform:translate(-50%,-50%) rotateX(-30deg) rotateY(25deg)}
+    75%{transform:translate(-50%,-50%) rotateX(-40deg) rotateY(45deg)}
+    100%{transform:translate(-50%,-50%) rotateX(-40deg) rotateY(45deg)}
+  }
+  .plane{
+    position:absolute;width:100px;height:100px;
+    backface-visibility:visible;
+    border:1px solid rgba(89,217,212,0.3);
+    overflow:hidden;
+  }
+  .plane img{width:100%;height:100%;object-fit:fill;display:block}
+  .floor{
+    transform:rotateX(90deg) translateZ(-50px);
+    background:rgba(10,42,74,0.6);
+  }
+  .left-wall{
+    transform:rotateY(-90deg) translateZ(-50px);
+    background:rgba(13,58,92,0.6);
+  }
+  .back-wall{
+    transform:translateZ(-50px);
+    background:rgba(15,69,112,0.6);
+  }
+
+  .corner-glow{
+    position:absolute;top:45%;left:50%;
+    width:140px;height:140px;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background:radial-gradient(circle,rgba(89,217,212,0.15) 0%,transparent 70%);
+    opacity:0;
+    animation:glowIn 1s ease 5.5s forwards;
+  }
+  @keyframes glowIn{to{opacity:1}}
+
+  /* Text + logo below the scene */
+  .loader-bottom{
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    animation:fadeTextIn 1s ease 0.5s forwards;
+    opacity:0;
+  }
+  @keyframes fadeTextIn{to{opacity:1}}
+
+  .loader-text{
+    color:#59D9D4;font-size:13px;letter-spacing:4px;
+    text-transform:uppercase;
+  }
+
+  .loader-logo{
+    width:160px;height:auto;
+    opacity:0.85;
+  }
+
+  /* === CARD === */
+  .card-wrapper{
+    opacity:0;transform:translateY(30px);
+    transition:opacity 0.8s ease 0.3s,transform 0.8s ease 0.3s;
+  }
+  .card-wrapper.visible{opacity:1;transform:translateY(0)}
+  .card{
+    background:#fff;border-radius:20px;max-width:420px;width:100%;
+    box-shadow:0 8px 40px rgba(0,0,0,0.10);overflow:hidden;
+  }
+  .header{background:#07243F;padding:40px 32px 32px;text-align:center}
+  .logo-area{
+    display:flex;align-items:center;justify-content:center;margin-bottom:20px;
+    animation:fadeIn 1s ease-out 0.3s both;
+  }
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+  .logo-area img{width:100%;max-width:300px;height:auto}
+  .avatar{
+    width:140px;height:140px;border-radius:50%;
+    border:3px solid #59D9D4;object-fit:cover;
+    margin:0 auto 16px;display:block;
+    animation:avatarPop 0.6s ease-out 0.5s both;
+    transition:transform 0.3s ease,box-shadow 0.3s ease;
+  }
+  .avatar:hover{transform:scale(1.08);box-shadow:0 0 20px rgba(89,217,212,0.5)}
+  @keyframes avatarPop{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
+  .name{color:#fff;font-size:22px;font-weight:700;letter-spacing:-0.3px;margin-bottom:6px;animation:fadeIn 0.6s ease-out 0.7s both}
+  .job-title{color:#59D9D4;font-size:14px;font-weight:500;letter-spacing:0.5px;animation:fadeIn 0.6s ease-out 0.9s both}
+  .body{padding:28px 24px 32px;display:flex;flex-direction:column;gap:12px}
+  .btn{
+    display:flex;align-items:center;gap:14px;padding:16px 20px;
+    border-radius:12px;text-decoration:none;font-size:15px;font-weight:600;
+    cursor:pointer;border:none;width:100%;
+    transition:transform 0.2s ease,box-shadow 0.2s ease,background 0.2s ease;
+    animation:btnSlideIn 0.5s ease-out both;
+  }
+  .btn:nth-child(1){animation-delay:1.0s}
+  .btn:nth-child(2){animation-delay:1.15s}
+  .btn:nth-child(3){animation-delay:1.3s}
+  .btn:nth-child(4){animation-delay:1.45s}
+  @keyframes btnSlideIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+  .btn:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,0.12);background:#e8f0f8}
+  .btn:active{transform:translateY(0)}
+  .btn-icon{
+    width:38px;height:38px;border-radius:9px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;flex-shrink:0;transition:transform 0.2s ease;
+  }
+  .btn:hover .btn-icon{transform:scale(1.1)}
+  .btn-primary,.btn-blue,.btn-teal,.btn-linkedin{background:#F4F6F8;color:#07243F}
+  .btn-primary .btn-icon,.btn-blue .btn-icon,.btn-teal .btn-icon,.btn-linkedin .btn-icon{background:#59D9D4;color:#07243F}
+  .btn-linkedin .btn-icon{font-weight:800;font-size:14px}
+  .btn-label{text-align:left;line-height:1.2}
+  .btn-sub{font-size:12px;font-weight:400;opacity:0.65;margin-top:2px}
+  .footer{text-align:center;padding:0 24px 24px;font-size:12px;color:#aaa;animation:fadeIn 0.6s ease-out 1.6s both}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="scene-wrapper">
+    <div class="corner-glow"></div>
+    <div class="corner">
+      <div class="plane floor">
+        <img src="texture_floor.png" alt=""/>
+      </div>
+      <div class="plane left-wall">
+        <img src="texture_left_wall.png" alt=""/>
+      </div>
+      <div class="plane back-wall">
+        <img src="texture_right_wall.png" alt=""/>
+      </div>
+    </div>
+  </div>
+  <div class="loader-bottom">
+    <div class="loader-text">Unfolding Reality</div>
+    <img class="loader-logo" src="shipreality-logo-dark.jpg" alt="ShipReality"/>
+  </div>
+</div>
+
+<!-- BUSINESS CARD -->
+<div class="card-wrapper" id="cardWrapper">
+<div class="card">
+  <div class="header">
+    <div class="logo-area">
+      <img src="shipreality-logo-dark.jpg" alt="ShipReality Logo"/>
+    </div>
+    <img class="avatar" src="1645037026288.jpg" alt="Markos Papatheodorou"/>
+    <div class="name">Markos Papatheodorou</div>
+    <div class="job-title">Marine Innovation Officer</div>
+  </div>
+  <div class="body">
+    <a class="btn btn-primary" href="#" onclick="downloadVCard();return false;">
+      <div class="btn-icon">👤</div>
+      <div class="btn-label">Save Contact<div class="btn-sub">Add to your phone contacts</div></div>
+    </a>
+    <a class="btn btn-blue" href="https://calendly.com/kaltsoukalask/30min" target="_blank">
+      <div class="btn-icon">📅</div>
+      <div class="btn-label">Schedule a Meeting<div class="btn-sub">Book a time that works for you</div></div>
+    </a>
+    <a class="btn btn-teal" href="https://www.youtube.com/watch?v=d6FLx5rH2hM" target="_blank">
+      <div class="btn-icon">▶</div>
+      <div class="btn-label">Watch Demo<div class="btn-sub">See ShipReality in action</div></div>
+    </a>
+    <a class="btn btn-linkedin" href="https://www.linkedin.com/in/markospapa" target="_blank">
+      <div class="btn-icon">in</div>
+      <div class="btn-label">Connect on LinkedIn<div class="btn-sub">Let's stay in touch</div></div>
+    </a>
+  </div>
+  <div class="footer">shipreality.com &nbsp;·&nbsp; © 2026 ShipReality</div>
+</div>
+</div>
+
+<script>
+setTimeout(function(){
+  document.getElementById('loader').classList.add('hidden');
+  document.getElementById('cardWrapper').classList.add('visible');
+  document.body.style.background='#f0f4f8';
+}, 9500);
+
+function downloadVCard(){
+  var v="BEGIN:VCARD\nVERSION:3.0\nN:Papatheodorou;Markos;;;\nFN:Markos Papatheodorou\nTITLE:Marine Innovation Officer\nORG:ShipReality\nEMAIL:mpapatheodorou@shipreality.com\nTEL:+306948127972\nURL:https://shipreality.com\nEND:VCARD";
+  var b=new Blob([v],{type:'text/vcard'});
+  var u=URL.createObjectURL(b);
+  var a=document.createElement('a');
+  a.href=u;a.download='Markos_Papatheodorou.vcf';a.click();
+  URL.revokeObjectURL(u);
+}
+</script>
+</body>
+</html>
